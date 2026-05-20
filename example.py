@@ -8,6 +8,7 @@ load_dotenv()
 sys.stdout.reconfigure(encoding="utf-8")
 EBR_USER = os.getenv("EBR_USER")
 EBR_PASS = os.getenv("EBR_PASS")
+BASE_URL = os.getenv("BASE_URL")
 
 
 async def main() -> None:
@@ -17,7 +18,7 @@ async def main() -> None:
         print("  $env:EBR_PASS = 'jelszo'")
         return
 
-    async with EbrClient(EBR_USER, EBR_PASS, headless=False) as client:
+    async with EbrClient(BASE_URL, EBR_USER, EBR_PASS, headless=False) as client:
         # Nyers xlsx letöltés – a tartalom vizsgálatához
         # await client.download_raw_xlsx("raw_export.xlsx")
 
@@ -26,10 +27,6 @@ async def main() -> None:
         # palyazatok = await client.get_palyazatok(ev=2026)
         # client.export_csv(palyazatok, "palyazatok_2026.csv")
         # client.export_json(palyazatok, "palyazatok_2026.json")
-
-        # Natív export gomb (xlsx letöltés) – kommentezd ki ha nem kell
-        # print("Export letöltés (xlsx)...")
-        # await client.download_export(ev=2026, filename="palyazatok_2026.xlsx")
 
         # Szűrés év + pályázat neve szerint
         print("Lekérdezés: 2026, 'Vis maior' névszűrővel...")

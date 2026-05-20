@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -8,16 +9,15 @@ from typing import Any
 import openpyxl
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 
-BASE_URL = "https://ebr42.gov.hu"
-PALYAZAT_URL = f"{BASE_URL}/palyazat"
-
 _RPP_SELECT = "form1:talalatiTablazat_rppDD"
 _EXPORT_FULL = "form1:urlapokFullExport"   # összes rekord
 _EXPORT_CURRENT = "form1:urlapokExport"    # szűrt/aktuális nézet
 
 
 class EbrClient:
-    def __init__(self, username: str, password: str, headless: bool = True):
+    def __init__(self, base_url: str, username: str, password: str, headless: bool = True):
+        self.base_url = base_url
+        self.palyazat_url = f"{self.base_url}/palyazat"
         self.username = username
         self.password = password
         self.headless = headless
@@ -42,7 +42,7 @@ class EbrClient:
 
     async def _login(self) -> None:
         assert self._page is not None
-        await self._page.goto(PALYAZAT_URL)
+        await self._page.goto(self.palyazat_url)
         await self._page.wait_for_selector('[name="username"]', timeout=15000)
         await self._page.fill('[name="username"]', self.username)
         await self._page.fill('[name="password"]', self.password)
@@ -56,7 +56,7 @@ class EbrClient:
         if not token_match:
             raise RuntimeError("Nem található jakarta.faces.Token.")
         token = token_match.group(1)
-        url = f"{PALYAZAT_URL}/palyazatok/urlapok.xhtml?jakarta.faces.Token={token}&tipus=palyazat"
+        url = f"{self.palyazat_url}/palyazatok/urlapok.xhtml?jakarta.faces.Token={token}&tipus=palyazat"
         await self._page.goto(url)
         await self._page.wait_for_load_state("networkidle", timeout=20000)
 
